@@ -3,13 +3,8 @@ from numpy.typing import NDArray
 
 class Solution:
     def sigmoid(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
-        z *= -1.0
-        np.exp(z, out=z)       
-        z += 1.0
-        np.divide(1.0, z, out=z)
-        
-        return np.round(z, 5, out=z)
+        result = 1 / (1 + np.exp(-z))
+        return np.round(result, 5)
 
     def relu(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
-        z[z < 0] = 0
-        return z
+        return np.maximum(0, z)
