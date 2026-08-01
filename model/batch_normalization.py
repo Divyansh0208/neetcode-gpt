@@ -3,12 +3,21 @@ from typing import Tuple, List
 
 
 class Solution:
-    def batch_norm(self, x: List[List[float]], gamma: List[float], beta: List[float],
-                   running_mean: List[float], running_var: List[float],
-                   momentum: float, eps: float, training: bool) -> Tuple[List[List[float]], List[float], List[float]]:
+    def batch_norm(
+        self,
+        x: List[List[float]],
+        gamma: List[float],
+        beta: List[float],
+        running_mean: List[float],
+        running_var: List[float],
+        momentum: float,
+        eps: float,
+        training: bool,
+    ) -> Tuple[List[List[float]], List[float], List[float]]:
         x = np.array(x)
         gamma = np.array(gamma)
         beta = np.array(beta)
+
         running_mean = np.array(running_mean, dtype=np.float64)
         running_var = np.array(running_var, dtype=np.float64)
 
@@ -20,6 +29,14 @@ class Solution:
             running_var = (1 - momentum) * running_var + momentum * batch_var
         else:
             x_hat = (x - running_mean) / np.sqrt(running_var + eps)
+        
+        out = x_hat * gamma + beta
+        out = np.round(out, decimals=4)
+        running_mean = np.round(running_mean, decimals=4)
+        running_var = np.round(running_var, decimals=4)
 
-        out = gamma * x_hat + beta
-        return (np.round(out, 4).tolist(), np.round(running_mean, 4).tolist(), np.round(running_var, 4).tolist())
+        return (
+            out.tolist(),
+            running_mean.tolist(),
+            running_var.tolist()
+        )
