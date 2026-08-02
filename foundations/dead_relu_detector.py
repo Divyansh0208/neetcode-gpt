@@ -12,7 +12,6 @@ class Solution:
                     dead = (x == 0).all(dim=0).float().mean().item()
                     dead_fractions.append(round(dead, 4))
         return dead_fractions
-
     def suggest_fix(self, dead_fractions: List[float]) -> str:
         if len(dead_fractions) == 0:
             return 'healthy'
