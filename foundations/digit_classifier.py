@@ -11,7 +11,6 @@ class Solution(nn.Module):
         self.dropout = nn.Dropout(p=0.2)
         self.projection = nn.Linear(512, 10)
         self.sigmoid = nn.Sigmoid()
-
     def forward(self, images: TensorType[float]) -> TensorType[float]:
         torch.manual_seed(0)
         x = self.first_linear(images)
