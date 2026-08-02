@@ -4,22 +4,15 @@ from typing import Tuple
 
 
 class Solution:
+    def gradient(self, X:  NDArray[np.float64], diff: NDArray[np.float64], n: int):
+        return (2 / n * (np.dot(X.transpose(), diff)), 2 * np.average(diff))
     def train(self, X: NDArray[np.float64], y: NDArray[np.float64], epochs: int, lr: float) -> Tuple[NDArray[np.float64], float]:
-        n = X.shape[0]
-        w = np.zeros(X.shape[1])
-        b = 0.0
-
-        for _ in range(epochs):
-            # Forward pass
-            y_hat = X @ w + b
-            error = y_hat - y
-
-            # Compute gradients of MSE loss
-            dw = (2.0 / n) * (X.T @ error)
-            db = (2.0 / n) * np.sum(error)
-
-            # Update weights
-            w = w - lr * dw
-            b = b - lr * db
-
-        return (np.round(w, 5), round(float(b), 5))
+        n, m = X.shape
+        W, B = (np.zeros(m), 0)
+        for epoch_id in range(epochs):
+            y_hat = np.dot(X, W) + B
+            diff = y_hat - y
+            gradient_W, gradient_B = self.gradient(X, diff, X.shape[0])
+            W -= lr*gradient_W
+            B -= lr*gradient_B
+        return (np.round(W, 5), round(B, 5))
