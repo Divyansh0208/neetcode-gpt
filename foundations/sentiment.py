@@ -6,12 +6,12 @@ class Solution(nn.Module):
     def __init__(self, vocabulary_size: int):
         super().__init__()
         torch.manual_seed(0)
-        self.embedding_layer = nn.Embedding(vocabulary_size, 16)
-        self.linear_layer = nn.Linear(16, 1)
-        self.sigmoid_layer = nn.Sigmoid()
+        self.embedding = nn.Embedding(vocabulary_size, 16)
+        self.linear = nn.Linear(16, 1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x: TensorType[int]) -> TensorType[float]:
-        embeddings = self.embedding_layer(x)
+        embeddings = self.embedding(x)
         averaged = torch.mean(embeddings, dim=1)
-        projected = self.linear_layer(averaged)
-        return torch.round(self.sigmoid_layer(projected), decimals=4)
+        projected = self.linear(averaged)
+        return torch.round(self.sigmoid(projected), decimals=4)
