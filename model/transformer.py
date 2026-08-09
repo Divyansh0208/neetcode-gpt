@@ -13,12 +13,10 @@ class TransformerBlock(nn.Module):
         self.second_norm = nn.LayerNorm(model_dim)
 
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
-        # Round answer to 4 decimal places
         torch.manual_seed(0)
-        embedded = embedded + self.attention(self.first_norm(embedded)) # skip connection
-        embedded = embedded + self.linear_network(self.second_norm(embedded)) # another skip connection
+        embedded = embedded + self.attention(self.first_norm(embedded))
+        embedded = embedded + self.linear_network(self.second_norm(embedded))
         return torch.round(embedded, decimals=4)
-
 
     class MultiHeadedSelfAttention(nn.Module):
 
@@ -35,7 +33,7 @@ class TransformerBlock(nn.Module):
                 q = self.query_gen(embedded)
                 v = self.value_gen(embedded)
 
-                scores = q @ torch.transpose(k, 1, 2) # @ is the same as torch.matmul()
+                scores = q @ torch.transpose(k, 1, 2)
                 context_length, attention_dim = k.shape[1], k.shape[2]
                 scores = scores / (attention_dim ** 0.5)
 
@@ -43,7 +41,6 @@ class TransformerBlock(nn.Module):
                 mask = lower_triangular == 0
                 scores = scores.masked_fill(mask, float('-inf'))
                 scores = nn.functional.softmax(scores, dim = 2)
-
                 return scores @ v
 
         def __init__(self, model_dim: int, num_heads: int):
@@ -69,7 +66,7 @@ class TransformerBlock(nn.Module):
             self.up_projection = nn.Linear(model_dim, model_dim * 4)
             self.relu = nn.ReLU()
             self.down_projection = nn.Linear(model_dim * 4, model_dim)
-            self.dropout = nn.Dropout(0.2) # using p = 0.2
+            self.dropout = nn.Dropout(0.2)
 
         def forward(self, x: TensorType[float]) -> TensorType[float]:
             torch.manual_seed(0)
