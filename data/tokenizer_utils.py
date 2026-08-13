@@ -2,36 +2,28 @@ from typing import List, Dict
 
 class Solution:
     def tokenize_numbers(self, numbers: List[int], vocab: Dict[str, int]) -> List[List[str]]:
-        result = []
+        all_tokens = []
         for num in numbers:
-            text = str(num)
-            tokens = self._greedy_tokenize(text, vocab)
-            result.append(tokens)
-        return result
+            num_str = str(num)
+            all_tokens.append(self.greedy_tokenize(num_str, vocab))
+        return all_tokens             
+    
+    def greedy_tokenize(self, text: str, vocab: Dict[str, int]):
+        w = len(text)
+        tokens = []
+        w = len(text)
+        while w > 0:
+            if text[:w] in vocab:
+                tokens.append(text[:w]) 
+                text = text[w:]
+                w = len(text)
+            else:
+                w -= 1
+        return tokens
+
 
     def count_tokens(self, text: str, vocab: Dict[str, int]) -> int:
-        tokens = self._greedy_tokenize(text, vocab)
-        return len(tokens)
+        return len(self.greedy_tokenize(text, vocab))
 
     def fertility_score(self, text: str, vocab: Dict[str, int]) -> float:
-        tokens = self._greedy_tokenize(text, vocab)
-        words = text.split()
-        return round(len(tokens) / len(words), 4)
-
-    def _greedy_tokenize(self, text: str, vocab: Dict[str, int]) -> List[str]:
-        tokens = []
-        i = 0
-        while i < len(text):
-            best = None
-            for length in range(len(text) - i, 0, -1):
-                substr = text[i:i + length]
-                if substr in vocab:
-                    best = substr
-                    break
-            if best is None:
-                tokens.append(text[i])
-                i += 1
-            else:
-                tokens.append(best)
-                i += len(best)
-        return tokens
+        return round(self.count_tokens(text, vocab) / len(text.split(" ")), 4)
