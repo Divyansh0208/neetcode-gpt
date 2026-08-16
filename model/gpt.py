@@ -17,14 +17,12 @@ class GPT(nn.Module):
 
     def forward(self, context: TensorType[int]) -> TensorType[float]:
         torch.manual_seed(0)
-        # Token embeddings + positional embeddings
         embedded = self.word_embeddings(context)
         positions = torch.arange(context.shape[1], device=context.device)
         embedded = embedded + self.position_embeddings(positions)
 
-        # Pass through N transformer blocks, then final LayerNorm
         output = self.final_norm(self.transformer_blocks(embedded))
-        logits = self.vocab_projection(output)  # (B, T, vocab_size)
+        logits = self.vocab_projection(output)
 
         return torch.round(logits, decimals=4)
 
@@ -39,13 +37,13 @@ class GPT(nn.Module):
                     self.key_gen = nn.Linear(model_dim, head_size, bias=False)
                     self.query_gen = nn.Linear(model_dim, head_size, bias=False)
                     self.value_gen = nn.Linear(model_dim, head_size, bias=False)
-
+                
                 def forward(self, embedded: TensorType[float]) -> TensorType[float]:
                     k = self.key_gen(embedded)
                     q = self.query_gen(embedded)
                     v = self.value_gen(embedded)
 
-                    scores = q @ torch.transpose(k, 1, 2) # @ is the same as torch.matmul()
+                    scores = q @ torch.transpose(k, 1, 2)
                     context_length, attention_dim = k.shape[1], k.shape[2]
                     scores = scores / (attention_dim ** 0.5)
 
@@ -55,7 +53,7 @@ class GPT(nn.Module):
                     scores = nn.functional.softmax(scores, dim = 2)
 
                     return scores @ v
-
+                
             def __init__(self, model_dim: int, num_heads: int):
                 super().__init__()
                 torch.manual_seed(0)
@@ -70,7 +68,7 @@ class GPT(nn.Module):
                     head_outputs.append(head(embedded))
                 concatenated = torch.cat(head_outputs, dim = 2)
                 return self.output_proj(concatenated)
-
+        
         class VanillaNeuralNetwork(nn.Module):
 
             def __init__(self, model_dim: int):
@@ -80,7 +78,7 @@ class GPT(nn.Module):
                 self.relu = nn.ReLU()
                 self.down_projection = nn.Linear(model_dim * 4, model_dim)
                 self.dropout = nn.Dropout(0.2) # using p = 0.2
-
+            
             def forward(self, x: TensorType[float]) -> TensorType[float]:
                 torch.manual_seed(0)
                 return self.dropout(self.down_projection(self.relu(self.up_projection(x))))
@@ -95,6 +93,6 @@ class GPT(nn.Module):
 
         def forward(self, embedded: TensorType[float]) -> TensorType[float]:
             torch.manual_seed(0)
-            embedded = embedded + self.attention(self.first_norm(embedded)) # skip connection
-            embedded = embedded + self.linear_network(self.second_norm(embedded)) # another skip connection
+            embedded = embedded + self.attention(self.first_norm(embedded))
+            embedded = embedded + self.linear_network(self.second_norm(embedded))
             return embedded
